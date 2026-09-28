@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  
+  <!-- Highlight.js for Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <!-- Marked.js for Markdown Rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <!-- Header Navbar -->
+  <header class="app-header glass">
+    <a href="/" class="brand">
+      <div class="brand-icon">✨</div>
+      <span>{{ app_name }}</span>
+    </a>
+
+    <ul class="nav-links">
+      <li>
+        <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}">
+          🏠 Home
+        </a>
+      </li>
+      <li>
+        <a href="/chat" class="nav-link {% if active_page == 'chat' %}active{% endif %}">
+          💬 Chat
+        </a>
+      </li>
+      <li>
+        <a href="/vision" class="nav-link {% if active_page == 'vision' %}active{% endif %}">
+          👁️ Vision
+        </a>
+      </li>
+      <li>
+        <a href="/tools" class="nav-link {% if active_page == 'tools' %}active{% endif %}">
+          🛠️ AI Tools
+        </a>
+      </li>
+      <li>
+        <a href="/settings" class="nav-link {% if active_page == 'settings' %}active{% endif %}">
+          ⚙️ Settings
+        </a>
+      </li>
+    </ul>
+
+    <div class="header-actions">
+      <a href="/settings" id="apiStatusBadge" class="api-status-badge {% if has_api_key %}status-online{% else %}status-offline{% endif %}">
+        <span class="status-dot"></span>
+        {% if has_api_key %}Gemini Ready{% else %}Key Required{% endif %}
+      </a>
+      <button id="themeToggle" class="theme-toggle-btn" title="Toggle Light/Dark Theme">☀️</button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <p>Powered by <strong>Google Gemini API</strong> &amp; <strong>FastAPI</strong> &bull; Built with Python 3.10+</p>
+  </footer>
+
+  <!-- Base JS -->
+  <script src="/static/js/main.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

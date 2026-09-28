@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}Settings &amp; API Key - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+  <div style="margin-bottom: 2rem;">
+    <h2>Settings &amp; Configuration</h2>
+    <p class="subtitle">Manage your Google Gemini API credentials and configure application runtime preferences.</p>
+  </div>
+
+  <!-- API Key Manager Card -->
+  <div class="card glass" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1rem;">🔑 Google Gemini API Key</h3>
+    <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem;">
+      You can either save your key directly in your project's <code>.env</code> file or set it dynamically below.
+    </p>
+
+    <form id="keyForm">
+      <div class="form-group">
+        <label for="apiKeyInput" class="form-label">API Key</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input 
+            type="password" 
+            id="apiKeyInput" 
+            class="form-control" 
+            placeholder="AIzaSy..."
+            value="{% if has_api_key %}••••••••••••••••••••••••••••••••{% endif %}"
+          >
+          <button type="button" id="toggleKeyVisibility" class="btn btn-secondary" style="padding: 0 1rem;">
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+        <button type="button" id="testKeyBtn" class="btn btn-secondary">
+          🔍 Test Connection
+        </button>
+        <button type="submit" id="saveKeyBtn" class="btn btn-primary">
+          💾 Save for Session
+        </button>
+      </div>
+    </form>
+
+    <div id="keyStatusAlert" style="margin-top: 1.25rem; display: none;"></div>
+  </div>
+
+  <!-- Setup Tutorial Card -->
+  <div class="card glass" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1rem;">📚 How to Get a Free Gemini API Key</h3>
+    <ol style="padding-left: 1.5rem; color: var(--text-secondary); line-height: 1.8;">
+      <li>
+        Visit the official <strong><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="color: var(--accent-primary);">Google AI Studio</a></strong>.
+      </li>
+      <li>Sign in with your Google account.</li>
+      <li>Click <strong>"Create API key"</strong> in the top-right corner.</li>
+      <li>Choose a Google Cloud project (or create a new free one automatically).</li>
+      <li>Copy your generated key and paste it into the field above or set <code>GEMINI_API_KEY=your_key</code> in your <code>.env</code> file.</li>
+    </ol>
+  </div>
+
+  <!-- Model Reference Card -->
+  <div class="card glass">
+    <h3 style="margin-bottom: 1rem;">⚡ Supported Gemini Models</h3>
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-sm);">
+        <strong>gemini-2.5-flash</strong> <span style="font-size: 0.75rem; background: var(--accent-primary); color: white; padding: 0.1rem 0.5rem; border-radius: 9999px; margin-left: 0.5rem;">Recommended</span>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">
+          Fast, intelligent, and highly cost-efficient multimodal model designed for high frequency chat, coding, and vision analysis.
+        </p>
+      </div>
+      <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-sm);">
+        <strong>gemini-2.5-pro</strong>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">
+          State-of-the-art reasoning model specialized for complex code generation, mathematical analysis, and extensive multi-step problem solving.
+        </p>
+      </div>
+      <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-sm);">
+        <strong>gemini-1.5-flash &amp; gemini-1.5-pro</strong>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">
+          Production-tested models featuring massive 1M-2M token context windows for processing huge documents and codebases.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const keyInput = document.getElementById('apiKeyInput');
+  const toggleBtn = document.getElementById('toggleKeyVisibility');
+  const testBtn = document.getElementById('testKeyBtn');
+  const saveBtn = document.getElementById('saveKeyBtn');
+  const keyForm = document.getElementById('keyForm');
+  const alertBox = document.getElementById('keyStatusAlert');
+
+  // Pre-fill from sessionStorage if available
+  const sessionKey = sessionStorage.getItem('gemini_api_key');
+  if (sessionKey) {
+    keyInput.value = sessionKey;
+  }
+
+  // Toggle Visibility
+  toggleBtn.addEventListener('click', () => {
+    if (keyInput.type === 'password') {
+      keyInput.type = 'text';
+      toggleBtn.textContent = '🔒';
+    } else {
+      keyInput.type = 'password';
+      toggleBtn.textContent = '👁️';
+    }
+  });
+
+  // Test Connection
+  testBtn.addEventListener('click', async () => {
+    let key = keyInput.value.trim();
+    if (key.includes('••••')) key = ''; // Don't send mask
+
+    testBtn.disabled = true;
+    testBtn.innerHTML = '<span class="spinner"></span> Testing...';
+    showAlert('Testing connection to Google Gemini API...', 'info');
+
+    try {
+      const res = await fetch('/api/verify-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: key || null })
+      });
+      const data = await res.json();
+      testBtn.disabled = false;
+      testBtn.innerHTML = '🔍 Test Connection';
+
+      if (data.valid) {
+        showAlert(`✅ ${data.message} ${data.sample_model ? '(' + data.sample_model + ')' : ''}`, 'success');
+        showToast('Gemini API connected successfully!', 'success');
+      } else {
+        showAlert(`❌ ${data.message}`, 'error');
+        showToast('Connection failed: check API key', 'error');
+      }
+    } catch (err) {
+      testBtn.disabled = false;
+      testBtn.innerHTML = '🔍 Test Connection';
+      showAlert(`❌ Network error: ${err.message}`, 'error');
+    }
+  });
+
+  // Save for Session
+  keyForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const key = keyInput.value.trim();
+    if (!key || key.includes('••••')) {
+      showToast('Please enter a valid key to save.', 'warning');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/settings/save-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: key })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        sessionStorage.setItem('gemini_api_key', key);
+        showAlert('✅ API Key saved for active runtime session!', 'success');
+        showToast('Key saved!', 'success');
+        initApiStatus();
+      } else {
+        showAlert(`❌ Error: ${data.detail}`, 'error');
+      }
+    } catch (err) {
+      showAlert(`❌ Network error: ${err.message}`, 'error');
+    }
+  });
+
+  function showAlert(msg, type) {
+    alertBox.style.display = 'block';
+    alertBox.className = `toast toast-${type}`;
+    alertBox.style.position = 'static';
+    alertBox.textContent = msg;
+  }
+});
+</script>
+{% endblock %}

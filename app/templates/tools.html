@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Developer Tools - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 1.5rem;">
+  <h2>Gemini AI Studio Tools</h2>
+  <p class="subtitle">Specialized AI utilities for software engineers, researchers, and content creators.</p>
+</div>
+
+<!-- Tabs Navigation -->
+<div class="tabs-nav">
+  <button class="tab-btn active" data-tab="codeStudioTab">💻 Code Studio</button>
+  <button class="tab-btn" data-tab="summarizerTab">📝 Content &amp; Summarizer</button>
+</div>
+
+<!-- Tab 1: Code Studio -->
+<div id="codeStudioTab" class="tab-content active">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+    <div class="card glass">
+      <form id="codeForm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label for="codeAction" class="form-label">Action</label>
+            <select id="codeAction" class="form-select">
+              <option value="explain">Explain Code Step-by-Step</option>
+              <option value="debug">Find Bugs &amp; Fix</option>
+              <option value="optimize">Optimize Complexity &amp; Speed</option>
+              <option value="test">Generate Unit Tests</option>
+              <option value="refactor">Refactor to Clean Code</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="codeLanguage" class="form-label">Language</label>
+            <select id="codeLanguage" class="form-select">
+              <option value="python" selected>Python</option>
+              <option value="javascript">JavaScript</option>
+              <option value="typescript">TypeScript</option>
+              <option value="go">Go</option>
+              <option value="rust">Rust</option>
+              <option value="java">Java</option>
+              <option value="cpp">C++</option>
+              <option value="sql">SQL</option>
+              <option value="bash">Bash / Shell</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="codeInput" class="form-label">Code Snippet</label>
+          <textarea 
+            id="codeInput" 
+            class="form-control" 
+            rows="12" 
+            style="font-family: monospace; font-size: 0.9rem;"
+            placeholder="Paste your code snippet here..."
+            required
+          >def fibonacci(n):
+    if n <= 0:
+        return []
+    elif n == 1:
+        return [0]
+    seq = [0, 1]
+    while len(seq) < n:
+        seq.append(seq[-1] + seq[-2])
+    return seq</textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="codeModelSelect" class="form-label">Gemini Model</label>
+          <select id="codeModelSelect" class="form-select">
+            {% for m in available_models %}
+            <option value="{{ m }}" {% if m == default_model %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" id="runCodeBtn" class="btn btn-primary" style="width: 100%;">
+          ⚡ Run Code Tool
+        </button>
+      </form>
+    </div>
+
+    <div class="card glass" style="min-height: 520px; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+        <h3>AI Solution &amp; Feedback</h3>
+        <button id="copyCodeResultBtn" class="btn btn-secondary" style="display: none; padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+          📋 Copy
+        </button>
+      </div>
+      <div id="codeResult" style="flex: 1; overflow-y: auto; line-height: 1.6;">
+        <p style="color: var(--text-muted);">Run the code tool to view explanation, refactoring, or tests here.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tab 2: Content & Summarizer -->
+<div id="summarizerTab" class="tab-content">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+    <div class="card glass">
+      <form id="summarizerForm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label for="sumStyle" class="form-label">Summary Style</label>
+            <select id="sumStyle" class="form-select">
+              <option value="bullets" selected>Bullet Points</option>
+              <option value="executive">Executive Summary</option>
+              <option value="tldr">TL;DR &amp; Key Takeaways</option>
+              <option value="actionable">Actionable Checklist</option>
+              <option value="simplified">Simplified / Beginner</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="sumLength" class="form-label">Depth / Length</label>
+            <select id="sumLength" class="form-select">
+              <option value="short">Concise (Short)</option>
+              <option value="medium" selected>Balanced (Medium)</option>
+              <option value="long">In-Depth (Detailed)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="sumInput" class="form-label">Content to Summarize</label>
+          <textarea 
+            id="sumInput" 
+            class="form-control" 
+            rows="12" 
+            placeholder="Paste your article, meeting transcript, document, or research notes here..."
+            required
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="sumModelSelect" class="form-label">Gemini Model</label>
+          <select id="sumModelSelect" class="form-select">
+            {% for m in available_models %}
+            <option value="{{ m }}" {% if m == default_model %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" id="runSumBtn" class="btn btn-primary" style="width: 100%;">
+          📝 Generate Summary
+        </button>
+      </form>
+    </div>
+
+    <div class="card glass" style="min-height: 520px; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+        <h3>Synthesized Output</h3>
+        <button id="copySumResultBtn" class="btn btn-secondary" style="display: none; padding: 0.35rem 0.75rem; font-size: 0.8rem;">
+          📋 Copy
+        </button>
+      </div>
+      <div id="sumResult" style="flex: 1; overflow-y: auto; line-height: 1.7;">
+        <p style="color: var(--text-muted);">Generated summary will appear here.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/tools.js"></script>
+{% endblock %}

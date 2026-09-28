@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="chat-wrapper glass">
+  <!-- Chat Top Toolbar -->
+  <div class="chat-header">
+    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+      <div>
+        <label for="personaSelect" style="font-size: 0.8rem; color: var(--text-secondary); display: block;">Persona Preset</label>
+        <select id="personaSelect" class="form-select" style="padding: 0.35rem 0.75rem; font-size: 0.85rem; width: auto;">
+          <option value="general" selected>🤖 General Assistant</option>
+          <option value="python">🐍 Senior Python Architect</option>
+          <option value="writer">✍️ Creative Writer</option>
+          <option value="analyst">📊 Concise Data Analyst</option>
+          <option value="custom">⚙️ Custom System Prompt</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="modelSelect" style="font-size: 0.8rem; color: var(--text-secondary); display: block;">Gemini Model</label>
+        <select id="modelSelect" class="form-select" style="padding: 0.35rem 0.75rem; font-size: 0.85rem; width: auto;">
+          {% for m in available_models %}
+          <option value="{{ m }}" {% if m == default_model %}selected{% endif %}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 0.5rem;">
+      <button id="exportChatBtn" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" title="Export chat as JSON">
+        💾 Export
+      </button>
+      <button id="clearChatBtn" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" title="Clear conversation">
+        🗑️ Clear
+      </button>
+    </div>
+  </div>
+
+  <!-- Custom Prompt Input (Collapsible) -->
+  <div style="padding: 0.75rem 1.5rem; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); display: none;" id="customSystemPromptContainer">
+    <textarea id="customSystemPrompt" class="form-control" rows="2" placeholder="Define custom system persona / instructions for Gemini..."></textarea>
+  </div>
+
+  <!-- Messages List -->
+  <div id="chatMessages" class="chat-messages">
+    <div class="chat-bubble bot">
+      <p>👋 Hello! I am your <strong>Gemini AI</strong> conversational assistant. Ask me anything, request code explanations, or brainstorm ideas!</p>
+    </div>
+  </div>
+
+  <!-- Input Form -->
+  <form id="chatForm" class="chat-input-bar">
+    <input 
+      type="text" 
+      id="chatInput" 
+      class="form-control" 
+      placeholder="Type your message... (Press Enter to send)" 
+      autocomplete="off"
+      required
+    >
+    <button type="submit" class="btn btn-primary" id="sendBtn">
+      Send &rarr;
+    </button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/chat.js"></script>
+{% endblock %}

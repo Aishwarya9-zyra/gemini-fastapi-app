@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Vision & Multimodal - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+  <h2>Multimodal Vision Analyzer</h2>
+  <p class="subtitle">Upload any image or diagram and inspect it with Google Gemini's advanced multimodal vision understanding.</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+  <!-- Left Column: Upload and Form -->
+  <div class="card glass">
+    <form id="visionForm">
+      <div class="form-group">
+        <label class="form-label">Upload Image</label>
+        <div id="dropzone" class="dropzone">
+          <p style="font-size: 2.2rem; margin-bottom: 0.5rem;">📁</p>
+          <p style="font-weight: 600;">Drag &amp; drop an image here, or click to browse</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Supports PNG, JPEG, WEBP, GIF (Max 20MB)</p>
+          <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
+        </div>
+
+        <div id="previewContainer" style="display: none; margin-top: 1rem; text-align: center;">
+          <span id="fileNameBadge" style="display: inline-block; font-size: 0.8rem; background: var(--bg-tertiary); padding: 0.2rem 0.6rem; border-radius: var(--radius-sm); margin-bottom: 0.5rem;"></span>
+          <div>
+            <img id="imagePreview" class="image-preview" alt="Image preview">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="visionPrompt" class="form-label">Prompt / Question for Gemini</label>
+        <textarea 
+          id="visionPrompt" 
+          class="form-control" 
+          rows="3" 
+          placeholder="e.g. Describe this image, extract text from it, explain this architecture diagram, identify issues..."
+        >Describe and analyze this image in detail.</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="visionModelSelect" class="form-label">Vision Model</label>
+        <select id="visionModelSelect" class="form-select">
+          {% for m in available_models %}
+          <option value="{{ m }}" {% if m == default_model %}selected{% endif %}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button type="submit" id="analyzeBtn" class="btn btn-primary" style="width: 100%;">
+        ✨ Analyze Image
+      </button>
+    </form>
+  </div>
+
+  <!-- Right Column: Result -->
+  <div class="card glass" style="min-height: 480px;">
+    <h3 style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+      Analysis Output
+    </h3>
+    <div id="visionResult" style="line-height: 1.7; word-break: break-word;">
+      <p style="color: var(--text-muted);">
+        Select an image on the left and submit to view Gemini's structured visual analysis here.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/vision.js"></script>
+{% endblock %}
